@@ -31,7 +31,7 @@ func (app *application) routes() http.Handler {
 	v1Router.Mount("/", app.generalRoutes())
 	v1Router.Mount("/health", app.healthRoutes())
 	// this are hybrid routes
-
+	router.Get("/", app.generalHandler) // to proxy in case NPM tests run on root
 	// Mount the v1Router to the main base router
 	router.Mount("/v1", v1Router)
 	return router

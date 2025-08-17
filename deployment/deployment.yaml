@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: one-acre-api
+  labels:
+    app: one-acre-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: one-acre-api
+  template:
+    metadata:
+      labels:
+        app: one-acre-api
+    spec:
+      containers:
+        - name: api
+          image: brayancarter/one-acre-api:latest
+          imagePullPolicy: Always
+          # Since we use flags, we pass them here
+          # If env's we'd use the ENV struct instead
+          args:
+            - -port=4000
+            - -env=production
+            - -api-name=OneAcre
+            - -api-author=Blue-Davinci
+          ports:
+            - name: http
+              containerPort: 4000
+              protocol: TCP
+          # Probes hit your Chi routes: /v1/health/
+          livenessProbe:
+            httpGet:
+              path: /v1/health/
+              port: 4000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /v1/health/
+              port: 4000
+            initialDelaySeconds: 2
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65532
+            runAsGroup: 65532
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+      # For prod ors private repos,we would add imagePullSecrets here
+      # imagePullSecrets:
+      #   - name: regcred
