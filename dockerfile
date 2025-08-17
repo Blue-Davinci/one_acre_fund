@@ -14,8 +14,12 @@ RUN go mod download
 # Copy our src code
 COPY . .
 
+# Pick up platform from buildx (VERY IMPORTANT)
+ARG TARGETOS
+ARG TARGETARCH
+
 # Build binary for linux/amd64, fully static
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
+RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build \
     -ldflags="-w -s -extldflags '-static'" \
     -o /bin/api ./cmd/api
 

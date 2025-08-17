@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: api
-          image: brayancarter/one-acre-api:latest
+          image: brayancarter/one-acre-api:arm64-latest
           imagePullPolicy: Always
           # Since we use flags, we pass them here
           # If env's we'd use the ENV struct instead
