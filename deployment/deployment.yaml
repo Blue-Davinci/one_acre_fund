@@ -25,6 +25,8 @@ spec:
             - -env=production
             - -api-name=OneAcre
             - -api-author=Blue-Davinci
+            - -redis-addr=redis:6379 
+            - -redis-db=0
           ports:
             - name: http
               containerPort: 4000

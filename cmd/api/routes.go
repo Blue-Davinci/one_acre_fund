@@ -21,7 +21,7 @@ func (app *application) routes() http.Handler {
 		MaxAge:           300, // Maximum value not ignored by any of major browsers
 	})) // Make our categorized routes
 	//Use alice to make a global middleware chain.
-	globalMiddleware := alice.New(app.recoverPanic).Then
+	globalMiddleware := alice.New(app.recoverPanic, app.incrementorMiddleware).Then
 
 	// Apply the global middleware to the router
 	router.Use(globalMiddleware)

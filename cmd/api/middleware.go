@@ -1,8 +1,11 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
+
+	"go.uber.org/zap"
 )
 
 func (app *application) recoverPanic(next http.Handler) http.Handler {
@@ -26,6 +29,23 @@ func (app *application) recoverPanic(next http.Handler) http.Handler {
 				app.serverErrorResponse(w, r, fmt.Errorf("%s", err))
 			}
 		}()
+		next.ServeHTTP(w, r)
+	})
+}
+
+// incrementorMiddleware increments request count in Redis for each request.
+func (app *application) incrementorMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := context.Background()
+		if app.RedisDB != nil {
+			err := app.RedisDB.Incr(ctx, "requests_total").Err()
+			if err != nil {
+				app.logger.Warn("Failed to increment request counter", zap.String("error", err.Error()))
+			} else {
+				val, _ := app.RedisDB.Get(ctx, "requests_total").Result()
+				w.Header().Set("X-Request-Count", val) // optional: add to response
+			}
+		}
 		next.ServeHTTP(w, r)
 	})
 }
